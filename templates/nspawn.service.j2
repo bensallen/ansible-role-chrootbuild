@@ -1,0 +1,12 @@
+[Unit]
+Description={{ inventory_hostname }}-nspawn
+
+[Service]
+Type=simple
+ExecStartPre=-/usr/bin/systemd-nspawn --machine {{ inventory_hostname }} --directory {{ chroot_dir }} /usr/sbin/sshd-keygen
+ExecStart=/usr/bin/systemd-nspawn --machine {{ inventory_hostname }} --directory {{ chroot_dir }} /usr/sbin/sshd -D -p {{ ansible_ssh_port }}
+ExecStop=/usr/bin/machinectl --machine={{ inventory_hostname }} terminate
+
+TimeoutStartSec=0
+Restart=always
+RestartSec=10s

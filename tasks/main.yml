@@ -1,0 +1,99 @@
+---
+- name: Set OS dependent variables
+  include_vars: "{{ item }}"
+  with_first_found:
+   - "{{ ansible_distribution }}_{{ ansible_distribution_major_version }}.yml"
+   - "{{ ansible_distribution }}.yml"
+   - "{{ ansible_os_family }}_{{ ansible_distribution_major_version }}.yml"
+   - "{{ ansible_os_family }}.yml"
+   - default.yml
+
+- fail: msg="Bailing out. This role requires 'chroot_dir' be defined."
+  when: chroot_dir is not defined
+- fail: msg="Bailing out. This role requires 'chroot_build_host' be defined."
+  when: chroot_build_host is not defined
+
+# Block delgate_to {{ chroot_build_host }}
+- block:
+  - name: gather facts from chroot_build_host
+    setup:
+    delegate_facts: True
+  - name: Copy needed facts from chroot_build_host
+    set_fact:
+      ansible_os_family: "{{hostvars[chroot_build_host]['ansible_os_family']}}"
+      ansible_date_time: "{{hostvars[chroot_build_host]['ansible_date_time']}}"
+  - name: Ensure chroot dir and needed subdirectories exist
+    file:
+      name: "{{ item }}"
+      state: directory
+    with_items:
+      - "{{ chroot_dir }}"
+      - "{{ chroot_yumrepo_dir_path }}"
+
+  - name: Configure yum.conf
+    template:
+      src: yum.conf.j2
+      dest: "{{ chroot_yumrepo_conf_path }}"
+      mode: '0644'
+      owner: 'root'
+      group: 'root'
+
+  - name: Configure yum repos in yum.repos.d
+    template:
+      src: yum_repo.j2
+      dest: "{{ chroot_yumrepo_dir_path }}/{{ item.key }}.repo"
+      mode: '0644'
+      owner: 'root'
+      group: 'root'
+    with_dict: chroot_yumrepo_repos
+    when: chroot_yumrepo_repos.keys() | length > 0
+
+  - name: Install chroot_base_package_group and chrootbuild_extra_pkgs into chroot using yum --installroot
+    command: "{{ chrootbuild_yum_path }} -y -c {{ chroot_dir }}/etc/yum.conf install --installroot={{ chroot_dir }} {{ chrootbuild_yum_args }} @{{ chroot_base_package_group }} {{ chrootbuild_extra_pkgs }}"
+    register: createchroot_yum_install
+    changed_when: createchroot_yum_install.stdout.find('Nothing to do') == 1
+
+  - name: Create authorized_keys for root
+    authorized_key:
+      user: root
+      key: "{{ chrootbuild_root_ssh_pub_key }}"
+      manage_dir: yes
+      path: "{{ chroot_dir }}/root/.ssh/authorized_keys"
+    when: chrootbuild_root_add_ssh_pub_key
+
+  - name: Add systemd unit file on build_host to start sshd via systemd-nspawn
+    template:
+      src: nspawn.service.j2
+      dest: "/etc/systemd/system/{{ inventory_hostname }}-nspawn.service"
+      owner: root
+      group: root
+      mode: '0644'
+
+  - name: Run systemctl daemon-reload
+    command: systemctl daemon-reload
+    changed_when: false
+
+  - name: Start sshd within the chroot
+    service:
+      name: "{{ inventory_hostname }}-nspawn"
+      state: started
+  delegate_to: "{{ chroot_build_host }}"
+  when: not chrootbuild_teardown
+
+- block:
+  - name: Teardown | Stop sshd within the chroot
+    service:
+      name: "{{ inventory_hostname }}-nspawn"
+      state: stopped
+
+  - name: Teardown | Remove systemd unit file
+    file:
+      name: "/etc/systemd/system/{{ inventory_hostname }}-nspawn.service"
+      state: absent
+
+  - name: Teardown | Run systemctl daemon-reload
+    command: systemctl daemon-reload
+    changed_when: false
+
+  delegate_to: "{{ chroot_build_host }}"
+  when: chrootbuild_teardown
