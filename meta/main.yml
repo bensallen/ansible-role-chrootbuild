@@ -1,0 +1,17 @@
+galaxy_info:
+  author: Ben Allen
+  description: An ansible role to setup a chroot and launch a sshd instance in the chroot via systemd-nspawn to allow for further management via Ansible
+  company: Agronne National Laboratory
+  issue_tracker_url: https://gitlab.alcf.anl.gov/jlse/ansible-role-chrootbuilder/issues
+  license: BSD
+  min_ansible_version: 2.0
+  platforms:
+  - name: EL
+    versions:
+    - 7
+  galaxy_tags:
+    - System
+    - systemd-nspawn
+    - chroot
+# Yumrepo
+dependencies: []
