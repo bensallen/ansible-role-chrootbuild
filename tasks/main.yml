@@ -22,6 +22,8 @@
     set_fact:
       ansible_os_family: "{{hostvars[chroot_build_host]['ansible_os_family']}}"
       ansible_date_time: "{{hostvars[chroot_build_host]['ansible_date_time']}}"
+      ansible_distribution_major_version: "{{hostvars[chroot_build_host]['ansible_distribution_major_version']}}"
+      ansible_architecture: "{{hostvars[chroot_build_host]['ansible_architecture']}}"
   - name: Ensure chroot dir and needed subdirectories exist
     file:
       name: "{{ item }}"
@@ -45,7 +47,7 @@
       mode: '0644'
       owner: 'root'
       group: 'root'
-    with_dict: chroot_yumrepo_repos
+    with_dict: "{{ chroot_yumrepo_repos }}"
     when: chroot_yumrepo_repos.keys() | length > 0
 
   - name: Install chroot_base_package_group and chrootbuild_extra_pkgs into chroot using yum --installroot
