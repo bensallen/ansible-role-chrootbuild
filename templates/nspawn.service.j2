@@ -5,7 +5,7 @@ Description={{ inventory_hostname }}-nspawn
 Type=simple
 ExecStartPre=-/usr/bin/systemd-nspawn --machine {{ inventory_hostname }} --directory {{ chroot_dir }} /usr/sbin/sshd-keygen
 ExecStartPre=-/usr/bin/cp -a {{ chroot_dir }}/etc/resolv.conf {{ chroot_dir }}/etc/resolv.conf.nspawn
-ExecStart=/usr/bin/systemd-nspawn --machine {{ inventory_hostname }} --directory {{ chroot_dir }} /usr/sbin/sshd -D -p {{ ansible_ssh_port }}
+ExecStart=/usr/bin/systemd-nspawn --machine {{ inventory_hostname }} --directory {{ chroot_dir }} /usr/sbin/sshd -D -p {{ ansible_port }}
 ExecStartPost=-/usr/bin/mv {{ chroot_dir }}/etc/resolv.conf.nspawn {{ chroot_dir }}/etc/resolv.conf
 
 ExecStop=/usr/bin/machinectl --machine={{ inventory_hostname }} terminate

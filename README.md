@@ -7,9 +7,9 @@ Requirements
 ------------
 
 - Systemd build based system
-- Allow Ansible to connect to a non-standard SSH port as defined in the inventory for the chroot with ansible_ssh_port
+- Allow Ansible to connect to a non-standard SSH port as defined in the inventory for the chroot with ansible_port
 - Each chroot built on the same host should have unique variables:
-  - ansible_ssh_port
+  - ansible_port
   - chroot_dir
 
 Role Variables
