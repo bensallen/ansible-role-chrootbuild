@@ -92,12 +92,20 @@
       insertafter: EOF
       state: present
 
-  - name: Boot the chroot
+  - name: Boot (or reboot) the chroot
     service:
       name: "systemd-nspawn@{{ inventory_hostname }}"
-      state: started
+      state: restarted
   delegate_to: "{{ chroot_build_host }}"
   when: not chrootbuild_teardown
+
+- name: Wait for chroot to be booted
+  local_action:
+    wait_for:
+      host: "{{ chroot_build_host }}"
+      port: "{{ ansible_port }}"
+      state: started
+      timeout: 60
 
 - block:
   - name: Teardown | Poweroff the chroot
