@@ -64,7 +64,15 @@
       path: "{{ chroot_dir }}/root/.ssh/authorized_keys"
     when: chrootbuild_root_add_ssh_pub_key
 
-  - name: Add systemd overwrite so we don't use virtual networking
+  - name: Create systemd override directory
+    file:
+      path: "/etc/systemd/system/systemd-nspawn@{{ inventory_hostname }}.service.d"
+      state: directory
+      owner: root
+      group: root
+      mode: '0755'
+
+  - name: Add systemd override so we don't use virtual networking
     template:
       src: systemd-nspawn.service.j2
       dest: "/etc/systemd/system/systemd-nspawn@{{ inventory_hostname }}.service.d/override.conf"
