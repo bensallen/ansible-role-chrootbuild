@@ -12,7 +12,8 @@
   when: chroot_dir is not defined
 - fail: msg="Bailing out. This role requires 'chroot_build_host' be defined."
   when: chroot_build_host is not defined
-
+- fail: msg="Bailing out. Chroot's ansible_port cannot be the same as the build_host"
+  when: hostvars[chroot_build_host]['ansible_port'] == ansible_port
 # Block delgate_to {{ chroot_build_host }}
 - block:
   - name: gather facts from chroot_build_host
@@ -63,10 +64,10 @@
       path: "{{ chroot_dir }}/root/.ssh/authorized_keys"
     when: chrootbuild_root_add_ssh_pub_key
 
-  - name: Add systemd unit file on build_host to start sshd via systemd-nspawn
+  - name: Add systemd overwrite so we don't use virtual networking
     template:
-      src: nspawn.service.j2
-      dest: "/etc/systemd/system/{{ inventory_hostname }}-nspawn.service"
+      src: systemd-nspawn.service.j2
+      dest: "/etc/systemd/system/systemd-nspawn@{{ inventory_hostname }}.service.d/override.conf"
       owner: root
       group: root
       mode: '0644'
@@ -75,27 +76,41 @@
     command: systemctl daemon-reload
     changed_when: false
 
-  - name: Start sshd within the chroot
+  - name: Set the sshd port in OPTIONS of sysconfig/sshd in the chroot so we don't conflict with the host
+    lineinfile:
+      dest: "{{ chroot_dir }}/etc/sysconfig/sshd"
+      regexp: "^OPTIONS="
+      line: "OPTIONS=\"-p {{ ansible_port }}\""
+      insertafter: EOF
+      state: present
+
+  - name: Boot the chroot
     service:
-      name: "{{ inventory_hostname }}-nspawn"
+      name: "systemd-nspawn@{{ inventory_hostname }}"
       state: started
   delegate_to: "{{ chroot_build_host }}"
   when: not chrootbuild_teardown
 
 - block:
-  - name: Teardown | Stop sshd within the chroot
+  - name: Teardown | Poweroff the chroot
     service:
-      name: "{{ inventory_hostname }}-nspawn"
+      name: "systemd-nspawn@{{ inventory_hostname }}"
       state: stopped
 
-  - name: Teardown | Remove systemd unit file
+  - name: Teardown | Remove systemd override conf
     file:
-      name: "/etc/systemd/system/{{ inventory_hostname }}-nspawn.service"
+      name: "/etc/systemd/system/systemd-nspawn@{{ inventory_hostname }}.service.d/override.conf"
       state: absent
 
   - name: Teardown | Run systemctl daemon-reload
     command: systemctl daemon-reload
     changed_when: false
+
+  - name: Remove the OPTIONS setting in sysconfig/sshd in the chroot to revert sshd port
+    lineinfile:
+      dest: "{{ chroot_dir }}/etc/sysconfig/sshd"
+      regexp: "^OPTIONS="
+      state: absent
 
   delegate_to: "{{ chroot_build_host }}"
   when: chrootbuild_teardown
