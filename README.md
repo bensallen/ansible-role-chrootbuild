@@ -7,7 +7,9 @@ Requirements
 ------------
 
 - Systemd build based system
+- Chroot name cannot contain any characters that systemd-nspawn and machinectl don't support, such as hypens
 - Allow Ansible to connect to a non-standard SSH port as defined in the inventory for the chroot with ansible_port
+- If you run a playbook and limit it to one chroot, you most also include the build_host in the limit.
 - Each chroot built on the same host should have unique variables:
   - ansible_port
   - chroot_dir
