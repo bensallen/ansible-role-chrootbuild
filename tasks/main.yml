@@ -12,19 +12,26 @@
   when: chroot_dir is not defined
 - fail: msg="Bailing out. This role requires 'chroot_build_host' be defined."
   when: chroot_build_host is not defined
+- fail: msg="Bailing out. Chroot's ansible_port must be defined"
+  when: ansible_port is not defined
+- fail: msg="Bailing out. Build host's ansible_port must be defined"
+  when: hostvars[chroot_build_host]['ansible_port'] is not defined
 - fail: msg="Bailing out. Chroot's ansible_port cannot be the same as the build_host"
   when: hostvars[chroot_build_host]['ansible_port'] == ansible_port
+
 # Block delgate_to {{ chroot_build_host }}
 - block:
   - name: gather facts from chroot_build_host
     setup:
     delegate_facts: True
+
   - name: Copy needed facts from chroot_build_host
     set_fact:
       ansible_os_family: "{{hostvars[chroot_build_host]['ansible_os_family']}}"
       ansible_date_time: "{{hostvars[chroot_build_host]['ansible_date_time']}}"
       ansible_distribution_major_version: "{{hostvars[chroot_build_host]['ansible_distribution_major_version']}}"
       ansible_architecture: "{{hostvars[chroot_build_host]['ansible_architecture']}}"
+
   - name: Ensure chroot dir and needed subdirectories exist
     file:
       name: "{{ item }}"
