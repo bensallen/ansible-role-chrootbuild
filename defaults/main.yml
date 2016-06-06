@@ -17,8 +17,9 @@ chroot_yumrepo_repos: "{{ yumrepo_repos|default({}) }}"
 
 # What base package group should be used to create the chroot
 chroot_base_package_group: "core"
-# A space delimited list of additional packages to install into the chroot, passed directly as an argument to yum
-chrootbuild_extra_pkgs: "kernel"
+# A list of additional packages to install into the chroot
+chrootbuild_extra_pkgs:
+  - "kernel"
 
 chrootbuild_root_add_ssh_pub_key: true
 

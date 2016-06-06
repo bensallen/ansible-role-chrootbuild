@@ -60,7 +60,7 @@
     when: chroot_yumrepo_repos.keys() | length > 0
 
   - name: Install chroot_base_package_group and chrootbuild_extra_pkgs into chroot using yum --installroot
-    command: "{{ chrootbuild_yum_path }} -y -c {{ chroot_dir }}/etc/yum.conf install --installroot={{ chroot_dir }} {{ chrootbuild_yum_args }} @{{ chroot_base_package_group }} {{ chrootbuild_extra_pkgs }}"
+    command: "{{ chrootbuild_yum_path }} -y -c {{ chroot_dir }}/etc/yum.conf install --installroot={{ chroot_dir }} {{ chrootbuild_yum_args }} @{{ chroot_base_package_group }} {{ chrootbuild_extra_pkgs | join(' ') }}"
     register: createchroot_yum_install
     changed_when: createchroot_yum_install.stdout.find('Nothing to do') == 1
 
