@@ -8,6 +8,9 @@ obsoletes=1
 gpgcheck=1
 plugins=1
 installonly_limit=3
+{% if chrootbuild_proxy_env.http_proxy is defined %}
+proxy={{ chrootbuild_proxy_env.http_proxy }}
+{% endif %}
 
 #  This is the default, if you make this bigger yum won't see if the metadata
 # is newer on the remote and so you'll "gain" the bandwidth of not having to
