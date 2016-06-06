@@ -8,8 +8,6 @@
    - "{{ ansible_os_family }}.yml"
    - default.yml
 
-- fail: msg="Bailing out. This role requires 'chroot_dir' be defined."
-  when: chroot_dir is not defined
 - fail: msg="Bailing out. This role requires 'chroot_build_host' be defined."
   when: chroot_build_host is not defined
 - fail: msg="Bailing out. Chroot's ansible_port must be defined"
@@ -18,6 +16,11 @@
   when: hostvars[chroot_build_host]['ansible_port'] is not defined
 - fail: msg="Bailing out. Chroot's ansible_port cannot be the same as the build_host"
   when: hostvars[chroot_build_host]['ansible_port'] == ansible_port
+
+- name: Set chroot_dir if not already set
+  set_fact:
+   chroot_dir: "{{ chroot_machine_path }}/{{ inventory_hostname }}"
+  when: chroot_dir is not defined
 
 # Block delgate_to {{ chroot_build_host }}
 - block:

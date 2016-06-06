@@ -3,6 +3,9 @@
 chroot_build_host:
 chroot_dir:
 
+# machine path that machinectl uses
+chroot_machine_path: "/var/lib/machines"
+
 # Variable to control if the chroot is torndown
 chrootbuild_teardown: false
 
