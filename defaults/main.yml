@@ -1,7 +1,6 @@
 ---
-# These two variables must be defined per chroot
-chroot_build_host:
-chroot_dir:
+# These must be defined:
+# chroot_build_host: buildhost
 
 # machine path that machinectl uses
 chroot_machine_path: "/var/lib/machines"
