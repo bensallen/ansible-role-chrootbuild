@@ -29,6 +29,7 @@
     set_fact:
       ansible_os_family: "{{hostvars[chroot_build_host]['ansible_os_family']}}"
       ansible_date_time: "{{hostvars[chroot_build_host]['ansible_date_time']}}"
+      ansible_distribution_version: "{{hostvars[chroot_build_host]['ansible_distribution_version']}}"
       ansible_distribution_major_version: "{{hostvars[chroot_build_host]['ansible_distribution_major_version']}}"
       ansible_architecture: "{{hostvars[chroot_build_host]['ansible_architecture']}}"
 
