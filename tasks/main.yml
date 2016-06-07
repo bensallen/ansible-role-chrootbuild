@@ -23,7 +23,7 @@
   when: chroot_dir is not defined
 
 - block:
-  
+
   - name: gather facts from chroot_build_host
     setup:
     delegate_facts: True
@@ -118,12 +118,12 @@
   delegate_to: "{{ chroot_build_host }}"
   when: not chrootbuild_teardown
 
-- block:
+- name: Teardown | Poweroff the chroot
+  command: "/bin/systemctl poweroff"
+  ignore_errors: true
+  when: chrootbuild_teardown
 
-  - name: Teardown | Poweroff the chroot
-    service:
-      name: "systemd-nspawn@{{ inventory_hostname }}"
-      state: stopped
+- block:
 
   - name: Teardown | Remove systemd override conf
     file:
