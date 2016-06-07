@@ -121,6 +121,8 @@
 - name: Teardown | Poweroff the chroot
   command: "/bin/systemctl poweroff"
   ignore_errors: true
+  async: 0
+  poll: 0
   when: chrootbuild_teardown
 
 - block:
