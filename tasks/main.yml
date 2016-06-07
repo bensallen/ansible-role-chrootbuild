@@ -22,8 +22,8 @@
    chroot_dir: "{{ chroot_machine_path }}/{{ inventory_hostname }}"
   when: chroot_dir is not defined
 
-# Block delgate_to {{ chroot_build_host }}
 - block:
+  
   - name: gather facts from chroot_build_host
     setup:
     delegate_facts: True
@@ -35,6 +35,10 @@
       ansible_distribution_version: "{{hostvars[chroot_build_host]['ansible_distribution_version']}}"
       ansible_distribution_major_version: "{{hostvars[chroot_build_host]['ansible_distribution_major_version']}}"
       ansible_architecture: "{{hostvars[chroot_build_host]['ansible_architecture']}}"
+  delegate_to: "{{ chroot_build_host }}"
+
+# Block delgate_to {{ chroot_build_host }}
+- block:
 
   - name: Ensure chroot dir and needed subdirectories exist
     file:
