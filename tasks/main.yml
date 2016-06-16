@@ -56,6 +56,13 @@
       owner: 'root'
       group: 'root'
 
+  - name: Loop over group defined yumrepo_<group> vars merging them into chroot_yumrepo_repos
+    set_fact: chroot_yumrepo_repos="{{ hostvars[inventory_hostname]['yumrepo_repos_' + item ]|combine(chroot_yumrepo_repos)}}"
+    when: hostvars[inventory_hostname]['yumrepo_repos_' + item ] is defined
+    with_items:
+      - "{{ group_names }}"
+      - "all"
+
   - name: Configure yum repos in yum.repos.d
     template:
       src: yum_repo.j2
