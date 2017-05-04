@@ -116,7 +116,7 @@
 
   - name: Disable problematic services from starting on boot
     file:
-      name: "{{ chroot_dir }}/{{ item.target }}.wants/{{ item.service }}
+      name: "{{ chroot_dir }}/etc/systemd/system/{{ item.target }}.wants/{{ item.service }}
       state: absent
     with_items: "{{ chrootbuild_problematic_sevices }}"
 
