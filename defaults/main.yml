@@ -30,3 +30,11 @@ chrootbuild_root_ssh_pub_key: 'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp2
 
 # Allow the specification of environment variables like http_proxy and https_proxy if needed to get to the yum repos
 chrootbuild_proxy_env: {}
+
+# List of services that should be disabled in the chroot before starting the container. This should only be used for
+# services that get enabled by later roles, but for whatever reason cause the container not to boot correctly.
+# Example
+# chrootbuild_problematic_sevices:
+#   - target: sysinit.target
+#     service: openibd.service
+chrootbuild_problematic_sevices: []

@@ -114,6 +114,12 @@
       insertafter: EOF
       state: present
 
+  - name: Disable problematic services from starting on boot
+    file:
+      name: "{{ chroot_dir }}/{{ item.target }}.wants/{{ item.service }}
+      state: absent
+    with_items: "{{ chrootbuild_problematic_sevices }}"
+
   - name: Boot (or reboot) the chroot
     service:
       name: "systemd-nspawn@{{ inventory_hostname }}"
