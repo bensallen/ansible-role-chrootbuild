@@ -17,6 +17,10 @@ chroot_yumrepo_conf_path: "{{ yumrepo_conf_path|default(chroot_dir + '/etc/yum.c
 # Yum repos, we use the yumrepos role for this work
 chroot_yumrepo_repos: "{{ yumrepo_repos|default({}) }}"
 
+# Merge values for yumrepo_repos by iterating over yumrepo_repos_<group_name>
+chroot_yumrepo_merge_repos: true
+
+
 # What base package group should be used to create the chroot
 chroot_base_package_group: "core"
 # A list of additional packages to install into the chroot
