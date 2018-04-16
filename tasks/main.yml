@@ -73,6 +73,14 @@
     with_dict: "{{ chroot_yumrepo_repos }}"
     when: chroot_yumrepo_repos.keys() | length > 0
 
+  - name: OpenSSL Directories exist
+    file:
+      name: "{{ item.path|default(chrootbuild_openssl_keys_path + '/' + item.name)|dirname }}"
+      state: directory
+    with_items:
+      - "{{ chrootbuild_openssl_keys }}"
+      - "{{ chrootbuild_openssl_certs }}"
+
   - name: Copying OpenSSL keys
     copy:
       content: "{{ item.key }}"
