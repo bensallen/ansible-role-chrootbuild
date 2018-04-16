@@ -14,12 +14,20 @@ chrootbuild_yum_args: ''
 # Specify where to put the yum.conf and yum.repos.d in the chroot, we use the yumrepos role for this work
 chroot_yumrepo_dir_path: "{{ yumrepo_dir_path|default(chroot_dir + '/etc/yum.repos.d') }}"
 chroot_yumrepo_conf_path: "{{ yumrepo_conf_path|default(chroot_dir + '/etc/yum.conf') }}"
+
 # Yum repos, we use the yumrepos role for this work
 chroot_yumrepo_repos: "{{ yumrepo_repos|default({}) }}"
 
 # Merge values for yumrepo_repos by iterating over yumrepo_repos_<group_name>
 chroot_yumrepo_merge_repos: true
 
+# Specify the default openssl key and certs path.
+chrootbuild_openssl_keys_path: "{{ openssl_keys_path|default(chroot_dir + '/etc/pki/tls/private') }}"
+chrootbuild_openssl_certs_path: "{{ openssl_keyopenssl_certs_paths_path|default(chroot_dir + '/etc/pki/tls/certs') }}"
+
+# Use the openssl roles values
+chrootbuild_openssl_keys: "{{ openssl_keys|default([]) }}"
+chrootbuild_openssl_certs: "{{ openssl_certs|default([]) }}"
 
 # What base package group should be used to create the chroot
 chroot_base_package_group: "core"
