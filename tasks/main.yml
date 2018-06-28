@@ -75,7 +75,7 @@
 
   - name: OpenSSL Directories exist
     file:
-      name: "{{ item.path|default(chrootbuild_openssl_keys_path + '/' + item.name)|dirname }}"
+      name: "{{ chroot_dir + item.path|default(chrootbuild_openssl_keys_path + '/' + item.name)|dirname }}"
       state: directory
     with_items:
       - "{{ chrootbuild_openssl_keys }}"
@@ -84,7 +84,7 @@
   - name: Copying OpenSSL keys
     copy:
       content: "{{ item.key }}"
-      dest: "{{ item.path|default(chrootbuild_openssl_keys_path + '/' + item.name)}}"
+      dest: "{{ chroot_dir + item.path|default(chrootbuild_openssl_keys_path + '/' + item.name)}}"
       owner: "{{ item.owner|default('root')}}"
       group: "{{ item.group|default('root')}}"
       mode: "{{ item.mode|default('0600')}}"
@@ -98,7 +98,7 @@
   - name: Copying certs
     copy:
       content: "{{ item.cert }}"
-      dest: "{{ item.path|default(chrootbuild_openssl_certs_path + '/' + item.name) }}"
+      dest: "{{ chroot_dir + item.path|default(chrootbuild_openssl_certs_path + '/' + item.name) }}"
       owner: "{{ item.owner|default('root')}}"
       group: "{{ item.group|default('root')}}"
       mode: "{{ item.mode|default('0644')}}"
