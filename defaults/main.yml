@@ -35,6 +35,10 @@ chroot_base_package_group: "core"
 chrootbuild_extra_pkgs:
   - "kernel"
 
+# Remove the chroot_dir before building. Useful if you want to ensure the entire build
+# always works but obviously takes longer.
+chroot_build_erase_chroot_before_build: false
+
 chrootbuild_root_add_ssh_pub_key: true
 
 # Default to using the insecure vagrant pub key, for the lack of a better default.

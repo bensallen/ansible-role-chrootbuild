@@ -40,6 +40,12 @@
 # Block delgate_to {{ chroot_build_host }}
 - block:
 
+  - name: Erase existing chroot dir if configured
+    file:
+      name: "{{ chroot_dir }}"
+      state: absent
+    when: chroot_build_erase_chroot_before_build
+
   - name: Ensure chroot dir and needed subdirectories exist
     file:
       name: "{{ item }}"
