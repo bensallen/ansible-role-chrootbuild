@@ -40,6 +40,11 @@
 # Block delgate_to {{ chroot_build_host }}
 - block:
 
+  - name: Ensure the chroot isn't booted
+    service:
+      name: "systemd-nspawn@{{ inventory_hostname }}"
+      state: stopped
+
   - name: Erase existing chroot dir if configured
     file:
       name: "{{ chroot_dir }}"
@@ -120,8 +125,6 @@
       warn: false
     register: createchroot_yum_install
     changed_when: createchroot_yum_install.stdout.find('Nothing to do') == 1
-
-
   
   - name: Create authorized_keys for root
     authorized_key:
@@ -166,10 +169,10 @@
     with_items:
       - "{{ chrootbuild_problematic_sevices }}"
 
-  - name: Boot (or reboot) the chroot
+  - name: Boot the chroot
     service:
       name: "systemd-nspawn@{{ inventory_hostname }}"
-      state: restarted
+      state: started
 
   - name: Wait for chroot to be booted
     local_action: wait_for host="{{ chroot_build_host }}" port="{{ ansible_port }}" state=started timeout=60
