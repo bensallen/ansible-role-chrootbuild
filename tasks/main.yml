@@ -177,6 +177,8 @@
       line: "OPTIONS=\"-p {{ ansible_port }}\""
       insertafter: EOF
       state: present
+    tags: 
+      - boot-only
 
   - name: Disable problematic services from starting on boot
     file:
