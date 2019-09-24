@@ -8,7 +8,7 @@
    - "{{ ansible_os_family }}.yml"
    - default.yml
   tags: 
-    - boot-only
+    - chrootbuild_boot_only
 
 - fail: msg="Bailing out. This role requires 'chroot_build_host' be defined."
   when: chroot_build_host is not defined
@@ -24,7 +24,7 @@
    chroot_dir: "{{ chroot_machine_path }}/{{ inventory_hostname }}"
   when: chroot_dir is not defined
   tags: 
-    - boot-only
+    - chrootbuild_boot_only
 
 - block:
 
@@ -32,7 +32,7 @@
     setup:
     delegate_facts: True
     tags: 
-      - boot-only
+      - chrootbuild_boot_only
 
   - name: Copy needed facts from chroot_build_host
     set_fact:
@@ -42,7 +42,7 @@
       ansible_distribution_major_version: "{{hostvars[chroot_build_host]['ansible_distribution_major_version']}}"
       ansible_architecture: "{{hostvars[chroot_build_host]['ansible_architecture']}}"
     tags: 
-      - boot-only
+      - chrootbuild_boot_only
   delegate_to: "{{ chroot_build_host }}"
 
 # Block delgate_to {{ chroot_build_host }}
@@ -53,7 +53,7 @@
       name: "systemd-nspawn@{{ inventory_hostname }}"
       state: stopped
     tags: 
-      - boot-only
+      - chrootbuild_boot_only
 
   - name: Erase existing chroot dir if configured
     file:
@@ -152,7 +152,7 @@
       group: root
       mode: '0755'
     tags: 
-      - boot-only
+      - chrootbuild_boot_only
 
   - name: Add systemd override so we don't use virtual networking
     template:
@@ -162,13 +162,13 @@
       group: root
       mode: '0644'
     tags: 
-      - boot-only
+      - chrootbuild_boot_only
 
   - name: Run systemctl daemon-reload
     command: systemctl daemon-reload
     changed_when: false
     tags: 
-      - boot-only
+      - chrootbuild_boot_only
 
   - name: Set the sshd port in OPTIONS of sysconfig/sshd in the chroot so we don't conflict with the host
     lineinfile:
@@ -178,7 +178,7 @@
       insertafter: EOF
       state: present
     tags: 
-      - boot-only
+      - chrootbuild_boot_only
 
   - name: Disable problematic services from starting on boot
     file:
@@ -187,19 +187,19 @@
     with_items:
       - "{{ chrootbuild_problematic_sevices }}"
     tags:
-      - boot-only
+      - chrootbuild_boot_only
 
   - name: Boot the chroot
     service:
       name: "systemd-nspawn@{{ inventory_hostname }}"
       state: started
     tags:
-      - boot-only
+      - chrootbuild_boot_only
 
   - name: Wait for chroot to be booted
     local_action: wait_for host="{{ chroot_build_host }}" port="{{ ansible_port }}" state=started timeout=60
     tags:
-      - boot-only
+      - chrootbuild_boot_only
 
   delegate_to: "{{ chroot_build_host }}"
   when: not chrootbuild_teardown
