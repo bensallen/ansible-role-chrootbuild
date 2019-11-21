@@ -26,6 +26,13 @@
   tags: 
     - chrootbuild_boot_only
 
+- name: Override facts
+  set_fact: "{{ item.key }}={{ item.value }}"
+  when: item.value is defined and item.value != ""
+  loop: "{{ lookup('dict', chrootbuild_fact_override) }}"
+  tags: 
+    - chrootbuild_boot_only
+    
 - block:
 
   - name: gather facts from chroot_build_host

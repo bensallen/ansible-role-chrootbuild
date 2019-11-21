@@ -54,3 +54,9 @@ chrootbuild_proxy_env: {}
 #   - target: sysinit.target
 #     service: openibd.service
 chrootbuild_problematic_sevices: []
+
+# Override facts
+# chrootbuild_fact_override:
+#    ansible_distribution_version: "7.7"
+# See if yumrepos already has this set.
+chrootbuild_fact_override: "{{ yumrepo_fact_override|default({}) }}"
