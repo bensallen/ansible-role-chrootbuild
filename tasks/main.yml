@@ -26,13 +26,6 @@
   tags: 
     - chrootbuild_boot_only
 
-- name: Override facts
-  set_fact: "{{ item.key }}={{ item.value }}"
-  when: item.value is defined and item.value != ""
-  loop: "{{ lookup('dict', chrootbuild_fact_override) }}"
-  tags: 
-    - chrootbuild_boot_only
-    
 - block:
 
   - name: gather facts from chroot_build_host
@@ -50,7 +43,15 @@
       ansible_architecture: "{{hostvars[chroot_build_host]['ansible_architecture']}}"
     tags: 
       - chrootbuild_boot_only
+
+  - name: Override facts
+    set_fact: "{{ item.key }}={{ item.value }}"
+    when: item.value is defined and item.value != ""
+    with_items: "{{ chrootbuild_fact_override|dict2items }}"
+    tags: 
+      - chrootbuild_boot_only
   delegate_to: "{{ chroot_build_host }}"
+
 
 # Block delgate_to {{ chroot_build_host }}
 - block:
