@@ -5,3 +5,9 @@ chrootbuild_zypper_path: '/usr/bin/zypper'
 chrootbuild_build_host_pkgs: "systemd-container"
 chrootbuild_sysconfig_sshd_path: "/etc/sysconfig/ssh"
 chrootbuild_sysconfig_sshd_var: "SSHD_OPTS"
+
+chroot_base_package_group_default: "enhanced_base"
+chroot_base_package_extra_pkgs_default:
+  - kernel
+  - glibc-i18ndata
+  - python

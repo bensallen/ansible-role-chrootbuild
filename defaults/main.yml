@@ -18,6 +18,9 @@ chroot_yumrepo_conf_path: "{{ yumrepo_conf_path|default(chroot_dir + '/etc/yum.c
 # Yum repos, we use the yumrepos role for this work
 chroot_yumrepo_repos: "{{ yumrepo_repos|default({}) }}"
 
+# Zypp repos, we use the zypp_repo role for this work
+chroot_zypp_repo_repos: "{{ zypp_repo_repos|default({}) }}"
+
 # Merge values for yumrepo_repos by iterating over yumrepo_repos_<group_name>
 chroot_yumrepo_merge_repos: true
 # Merge values for zypp_repo_repos by iterating over zypp_repo_repos_<group_name>
@@ -26,7 +29,6 @@ chroot_zypp_repo_merge_repos: true
 # Specify where to put the zypp.conf and repo files in the chroot
 chroot_zypp_dir_path: "{{ chroot_dir + '/etc/zypp/repos.d' }}"
 chroot_zypp_conf_path: "{{ chroot_dir + '/etc/zypp/zypp.conf' }}"
-
 
 # Specify the default openssl key and certs path.
 chrootbuild_openssl_keys_path: "{{ openssl_keys_path|default(chroot_dir + '/etc/pki/tls/private') }}"
@@ -37,10 +39,9 @@ chrootbuild_openssl_keys: "{{ openssl_keys|default([]) }}"
 chrootbuild_openssl_certs: "{{ openssl_certs|default([]) }}"
 
 # What base package group should be used to create the chroot
-chroot_base_package_group: "core"
+chroot_base_package_group: "{{ chroot_base_package_group_default }}"
 # A list of additional packages to install into the chroot
-chrootbuild_extra_pkgs:
-  - "kernel"
+chrootbuild_extra_pkgs: "{{ chroot_base_package_extra_pkgs_default }}"
 
 # Remove the chroot_dir before building. Useful if you want to ensure the entire build
 # always works but obviously takes longer.

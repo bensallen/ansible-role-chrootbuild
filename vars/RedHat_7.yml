@@ -2,5 +2,10 @@
 chrootbuild_pkg_mgr: yum
 chrootbuild_yum_path: '/usr/bin/yum'
 chrootbuild_build_host_pkgs: ""
+
 chrootbuild_sysconfig_sshd_path: "/etc/sysconfig/sshd"
 chrootbuild_sysconfig_sshd_var: "OPTIONS"
+
+chroot_base_package_group_default: "core"
+chroot_base_package_extra_pkgs_default:
+  - kernel

@@ -1,4 +1,10 @@
 ---
+- name: Ensure chroot dir and needed subdirectories exist
+  file:
+    name: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ chroot_yumrepo_dir_path }}"
 
 - name: Configure yum.conf
   template:

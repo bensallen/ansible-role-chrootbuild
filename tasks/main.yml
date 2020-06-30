@@ -1,14 +1,4 @@
 ---
-- name: Set OS dependent variables
-  include_vars: "{{ item }}"
-  with_first_found:
-   - "{{ ansible_distribution }}_{{ ansible_distribution_major_version }}.yml"
-   - "{{ ansible_distribution }}.yml"
-   - "{{ ansible_os_family }}_{{ ansible_distribution_major_version }}.yml"
-   - "{{ ansible_os_family }}.yml"
-   - default.yml
-  tags: 
-    - chrootbuild_boot_only
 
 - fail: msg="Bailing out. This role requires 'chroot_build_host' be defined."
   when: chroot_build_host is not defined
@@ -50,6 +40,16 @@
     with_items: "{{ chrootbuild_fact_override|dict2items }}"
     tags: 
       - chrootbuild_boot_only
+  - name: Set OS dependent variables
+    include_vars: "{{ item }}"
+    with_first_found:
+     - "{{ ansible_distribution }}_{{ ansible_distribution_major_version }}.yml"
+     - "{{ ansible_distribution }}.yml"
+     - "{{ ansible_os_family }}_{{ ansible_distribution_major_version }}.yml"
+     - "{{ ansible_os_family }}.yml"
+     - default.yml
+    tags: 
+      - chrootbuild_boot_only
   delegate_to: "{{ chroot_build_host }}"
 
 
@@ -79,7 +79,6 @@
       state: directory
     with_items:
       - "{{ chroot_dir }}"
-      - "{{ chroot_yumrepo_dir_path }}"
 
   - name: OpenSSL Directories exist
     file:
