@@ -1,0 +1,39 @@
+---
+- name: Configure zypp.conf
+  template:
+    src: zypp.conf.j2
+    dest: "{{ chroot_zypp_conf_path }}"
+    mode: '0644'
+    owner: 'root'
+    group: 'root'
+
+- name: Loop over group defined zypp_repo_repos_<group> vars merging them into chroot_zypp_repo_repos
+  set_fact: chroot_zypp_repo_repos="{{ hostvars[inventory_hostname]['zypp_repo_repos_' + item ]|combine(chroot_zypp_repo_repos)}}"
+  when: chroot_zypp_repo_merge_repos and hostvars[inventory_hostname]['zypp_repo_repos_' + item ] is defined
+  with_items:
+    - "{{ group_names }}"
+    - "ungrouped"
+    - "all"
+
+- name: Create zypper repository configurations for chroot
+  zypper_repository2:
+    name: "{{ item.key }}"
+    repo: "{{ item.value.baseurl }}"
+    enabled: "{{ item.value.enabled|default(True) }}"
+    description: "{{ item.value.description|default('') }}"
+    autorefresh: "{{ item.value.autorefresh|default(True) }}"
+    priority: "{{ item.value.priority|default(99) }}"
+    state: "{{ item.value.state|default('present') }}"
+    disable_gpg_check: "{{ item.value.disable_gpg_check|default(false) }}"
+    auto_import_keys: yes
+    overwrite_multiple: yes
+    extra_args_precommand: "--root {{ chroot_dir }} --config {{ chroot_zypp_conf_path }}"
+  with_dict: "{{ chroot_zypp_repo_repos }}"
+
+- name: Install chroot_base_package_group and chrootbuild_extra_pkgs into chroot
+  zypper:
+    extra_args_precommand: "--root {{ chroot_dir }} --config {{ chroot_zypp_conf_path }}"
+    name: "{{ item }}"
+  with_items:
+    - "pattern:{{ chroot_base_package_group }}"
+    - "{{ chrootbuild_extra_pkgs }}"

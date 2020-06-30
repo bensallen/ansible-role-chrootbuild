@@ -1,0 +1,34 @@
+---
+
+- name: Configure yum.conf
+  template:
+    src: yum.conf.j2
+    dest: "{{ chroot_yumrepo_conf_path }}"
+    mode: '0644'
+    owner: 'root'
+    group: 'root'
+
+- name: Loop over group defined yumrepo_<group> vars merging them into chroot_yumrepo_repos
+  set_fact: chroot_yumrepo_repos="{{ hostvars[inventory_hostname]['yumrepo_repos_' + item ]|combine(chroot_yumrepo_repos)}}"
+  when: chroot_yumrepo_merge_repos and hostvars[inventory_hostname]['yumrepo_repos_' + item ] is defined
+  with_items:
+    - "{{ group_names }}"
+    - "ungrouped"
+    - "all"
+
+- name: Configure yum repos in yum.repos.d
+  template:
+    src: yum_repo.j2
+    dest: "{{ chroot_yumrepo_dir_path }}/{{ item.key }}.repo"
+    mode: '0644'
+    owner: 'root'
+    group: 'root'
+  with_dict: "{{ chroot_yumrepo_repos }}"
+  when: chroot_yumrepo_repos.keys() | length > 0
+
+- name: Install chroot_base_package_group and chrootbuild_extra_pkgs into chroot using yum --installroot
+  command: "{{ chrootbuild_yum_path }} -y -c {{ chroot_dir }}/etc/yum.conf install --installroot={{ chroot_dir }} {{ chrootbuild_yum_args }} @{{ chroot_base_package_group }} {{ chrootbuild_extra_pkgs | join(' ') }}"
+  args:
+    warn: false
+  register: createchroot_yum_install
+  changed_when: createchroot_yum_install.stdout.find('Nothing to do') == 1

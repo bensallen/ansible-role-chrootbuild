@@ -20,6 +20,13 @@ chroot_yumrepo_repos: "{{ yumrepo_repos|default({}) }}"
 
 # Merge values for yumrepo_repos by iterating over yumrepo_repos_<group_name>
 chroot_yumrepo_merge_repos: true
+# Merge values for zypp_repo_repos by iterating over zypp_repo_repos_<group_name>
+chroot_zypp_repo_merge_repos: true
+
+# Specify where to put the zypp.conf and repo files in the chroot
+chroot_zypp_dir_path: "{{ chroot_dir + '/etc/zypp/repos.d' }}"
+chroot_zypp_conf_path: "{{ chroot_dir + '/etc/zypp/zypp.conf' }}"
+
 
 # Specify the default openssl key and certs path.
 chrootbuild_openssl_keys_path: "{{ openssl_keys_path|default(chroot_dir + '/etc/pki/tls/private') }}"

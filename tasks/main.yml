@@ -55,6 +55,10 @@
 
 # Block delgate_to {{ chroot_build_host }}
 - block:
+  - name: Install any required packages on the build host
+    package:
+      name: "{{ chrootbuild_build_host_pkgs }}"
+      state: installed
 
   - name: Ensure the chroot isn't booted
     service:
@@ -76,31 +80,6 @@
     with_items:
       - "{{ chroot_dir }}"
       - "{{ chroot_yumrepo_dir_path }}"
-
-  - name: Configure yum.conf
-    template:
-      src: yum.conf.j2
-      dest: "{{ chroot_yumrepo_conf_path }}"
-      mode: '0644'
-      owner: 'root'
-      group: 'root'
-
-  - name: Loop over group defined yumrepo_<group> vars merging them into chroot_yumrepo_repos
-    set_fact: chroot_yumrepo_repos="{{ hostvars[inventory_hostname]['yumrepo_repos_' + item ]|combine(chroot_yumrepo_repos)}}"
-    when: chroot_yumrepo_merge_repos and hostvars[inventory_hostname]['yumrepo_repos_' + item ] is defined
-    with_items:
-      - "{{ group_names }}"
-      - "all"
-
-  - name: Configure yum repos in yum.repos.d
-    template:
-      src: yum_repo.j2
-      dest: "{{ chroot_yumrepo_dir_path }}/{{ item.key }}.repo"
-      mode: '0644'
-      owner: 'root'
-      group: 'root'
-    with_dict: "{{ chroot_yumrepo_repos }}"
-    when: chroot_yumrepo_repos.keys() | length > 0
 
   - name: OpenSSL Directories exist
     file:
@@ -137,12 +116,8 @@
       selevel: "{{ item.selevel|default('s0')}}"
     with_items: "{{ chrootbuild_openssl_certs }}"
 
-  - name: Install chroot_base_package_group and chrootbuild_extra_pkgs into chroot using yum --installroot
-    command: "{{ chrootbuild_yum_path }} -y -c {{ chroot_dir }}/etc/yum.conf install --installroot={{ chroot_dir }} {{ chrootbuild_yum_args }} @{{ chroot_base_package_group }} {{ chrootbuild_extra_pkgs | join(' ') }}"
-    args:
-      warn: false
-    register: createchroot_yum_install
-    changed_when: createchroot_yum_install.stdout.find('Nothing to do') == 1
+  # Run package manager specific tasks
+  - include_tasks: "{{ chrootbuild_pkg_mgr }}.yml"
   
   - name: Create authorized_keys for root
     authorized_key:
@@ -178,11 +153,11 @@
     tags: 
       - chrootbuild_boot_only
 
-  - name: Set the sshd port in OPTIONS of sysconfig/sshd in the chroot so we don't conflict with the host
+  - name: Set the sshd port in sysconfig/sshd in the chroot so we don't conflict with the host
     lineinfile:
-      dest: "{{ chroot_dir }}/etc/sysconfig/sshd"
-      regexp: "^OPTIONS="
-      line: "OPTIONS=\"-p {{ ansible_port }}\""
+      dest: "{{ chroot_dir }}/{{ chrootbuild_sysconfig_sshd_path }}"
+      regexp: "^{{ chrootbuild_sysconfig_sshd_var }}="
+      line: "{{ chrootbuild_sysconfig_sshd_var }}=\"-p {{ ansible_port }}\""
       insertafter: EOF
       state: present
     tags: 
@@ -230,8 +205,8 @@
 
   - name: Remove the OPTIONS setting in sysconfig/sshd in the chroot to revert sshd port
     lineinfile:
-      dest: "{{ chroot_dir }}/etc/sysconfig/sshd"
-      regexp: "^OPTIONS="
+      dest: "{{ chroot_dir }}/{{ chrootbuild_sysconfig_sshd_path }}"
+      regexp: "^{{ chrootbuild_sysconfig_sshd_var }}="
       state: absent
 
   delegate_to: "{{ chroot_build_host }}"
