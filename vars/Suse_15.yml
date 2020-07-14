@@ -11,3 +11,4 @@ chroot_base_package_extra_pkgs_default:
   - kernel
   - glibc-i18ndata
   - python
+  - python-xml
