@@ -8,7 +8,9 @@ chrootbuild_sysconfig_sshd_var: "SSHD_OPTS"
 
 chroot_base_package_group_default: "enhanced_base"
 chroot_base_package_extra_pkgs_default:
-  - kernel
+  - ca-certificates
+  - ca-certificates-mozilla
   - glibc-i18ndata
+  - kernel
   - python
   - python-xml
