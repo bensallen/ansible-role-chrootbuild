@@ -12,5 +12,6 @@ chroot_base_package_extra_pkgs_default:
   - ca-certificates-mozilla
   - glibc-i18ndata
   - kernel
+  - insserv-compat
   - python
   - python-xml
